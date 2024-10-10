@@ -15,6 +15,8 @@ pub fn build(b: *std.Build) !void {
     const c_api = b.option(bool, "spv_cross_c_api", "Build C-API support into SPIRV-Cross") orelse true;
     const util = b.option(bool, "spv_cross_util", "Build SPIRV-Cross util support") orelse true;
 
+    const pic = b.option(bool, "pic", "Whether to use PIC when building the library");
+
     const options = .{
         .glsl = glsl,
         .hlsl = hlsl,
@@ -23,6 +25,7 @@ pub fn build(b: *std.Build) !void {
         .reflect = reflect,
         .c_api = c_api,
         .util = util,
+        .pic = pic,
     };
 
     if (build_static) {
@@ -44,6 +47,7 @@ pub const SpirvCrossOptions = struct {
     reflect: bool = true,
     c_api: bool = true,
     util: bool = true,
+    pic: ?bool = null,
 };
 
 pub fn createSpirvCross(
@@ -87,6 +91,8 @@ pub fn createSpirvCross(
         b.addSharedLibrary(lib_options)
     else
         b.addStaticLibrary(lib_options);
+
+    spirv_cross.root_module.pic = options.pic;
 
     spirv_cross.linkLibC();
     spirv_cross.linkLibCpp();
